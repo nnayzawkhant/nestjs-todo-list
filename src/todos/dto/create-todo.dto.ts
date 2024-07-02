@@ -5,5 +5,5 @@ export class CreateTodoDto {
   title: string;
 
   @ApiProperty({ required: false })
-  completed?: boolean;
+  isCompleted?: boolean;
 }

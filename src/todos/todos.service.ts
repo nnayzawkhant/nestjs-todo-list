@@ -1,36 +1,47 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTodoDto } from './dto/create-todo.dto';
+import { SearchTodoDto } from './dto/search-todo.dto';
 
 @Injectable()
 export class TodosService {
   constructor(private prisma: PrismaService) {}
 
-  create(createTodoDto: CreateTodoDto, userId: number) {
+  async create(createTodoDto: CreateTodoDto, userId: number) {
     return this.prisma.todo.create({
       data: {
-        title: createTodoDto.title,
-        completed: createTodoDto.completed ?? false,
+        ...createTodoDto,
         userId,
       },
     });
   }
 
-  findAll(userId: number) {
+  async findAll(userId: number, searchParams?: SearchTodoDto) {
+    const { title, isCompleted } = searchParams || {};
     return this.prisma.todo.findMany({
-      where: { userId },
+      where: {
+        userId,
+        title: title ? { contains: title } : undefined,
+        isCompleted: typeof isCompleted === 'boolean' ? isCompleted : undefined,
+      },
     });
   }
 
-  findOne(id: number, userId: number) {
+  async findOne(id: number, userId: number) {
     return this.prisma.todo.findFirst({
-      where: { id, userId },
+      where: {
+        id,
+        userId,
+      },
     });
   }
 
-  remove(id: number, userId: number) {
+  async remove(id: number, userId: number) {
     return this.prisma.todo.deleteMany({
-      where: { id, userId },
+      where: {
+        id,
+        userId,
+      },
     });
   }
 }
